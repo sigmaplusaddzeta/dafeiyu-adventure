@@ -42,6 +42,7 @@
 | `HudUI.cs` | 标题、HUD、暂停、结算界面 |
 | `GameAssets.cs` | 运行时像素贴图和 Tile 生成 |
 | `SfxSynth.cs` | 运行时合成音效和 BGM |
+| `Resources/Player/whale_maid.png` | 鲸鱼少女主角透明立绘 |
 
 ## Unity MCP
 

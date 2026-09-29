@@ -17,7 +17,7 @@ namespace Fishy
         Transform _visual;
         SpriteRenderer _sr;
 
-        float _coyote, _jumpBuf, _bob, _blinkT, _sprayT, _dustT, _turnT;
+        float _coyote, _jumpBuf, _bob, _sprayT, _dustT, _turnT;
         bool _jumpHeld, _dying;
         float _hAxis; bool _runHeld; // Update 采样的输入缓存（FixedUpdate 使用，更跟手）
         readonly List<Collider2D> _groundHits = new List<Collider2D>(8);
@@ -25,6 +25,7 @@ namespace Fishy
 
         const float HalfW = 0.4f, HalfH = 0.34f; // 碰撞盒半尺寸 (0.8 x 0.68)
         const float ArtBaseFacing = -1f; // 原始鱼图朝向左侧，右移时使用负缩放翻转
+        const float PlayerVisualScale = 0.82f;
 
         public Rigidbody2D Body { get { return _rb; } }
 
@@ -47,14 +48,16 @@ namespace Fishy
             vgo.transform.SetParent(transform, false);
             _visual = vgo.transform;
             _sr = vgo.AddComponent<SpriteRenderer>();
-            _sr.sprite = GameAssets.FishOpen;
+            _sr.sprite = GameAssets.PlayerSprite;
             _sr.sortingOrder = 3;
             _sr.flipX = false;
+            _visual.localPosition = new Vector3(0f, -HalfH, 0f);
+            _visual.localScale = new Vector3(ArtBaseFacing * PlayerVisualScale, PlayerVisualScale, 1f);
 
             transform.position = pos;
             Velocity = Vector2.zero;
             Face = 1; Grounded = false; _dying = false;
-            _blinkT = 0f; _sprayT = 1f; _dustT = 0f;
+            _sprayT = 1f; _dustT = 0f;
             _groundFilter = new ContactFilter2D
             {
                 useTriggers = false,
@@ -220,18 +223,17 @@ namespace Fishy
                 scaleX = 0.6f + 0.4f * (1f - k);
                 scaleY = 1.16f - 0.16f * (1f - k);
             }
-            _visual.localScale = new Vector3(ArtBaseFacing * scaleX * Face, scaleY, 1f);
+            _visual.localScale = new Vector3(
+                ArtBaseFacing * PlayerVisualScale * scaleX * Face,
+                PlayerVisualScale * scaleY,
+                1f);
 
             _bob += dt * (2f + Mathf.Abs(Velocity.x) * 0.6f);
             float yOff = Grounded
                 ? (Mathf.Abs(Velocity.x) > 0.3f ? Mathf.Sin(_bob * 2f) * 0.075f : 0f)
                 : -0.0625f;
-            _visual.localPosition = new Vector3(0, yOff, 0);
+            _visual.localPosition = new Vector3(0, -HalfH + yOff, 0);
             _sr.flipX = false;
-
-            _blinkT += dt;
-            if (_blinkT > 3.17f) _blinkT = 0f;
-            _sr.sprite = _blinkT > 3.0f ? GameAssets.FishBlink : GameAssets.FishOpen;
 
             _sprayT += dt;
             if (Grounded && _sprayT > 1.83f)
@@ -269,7 +271,7 @@ namespace Fishy
                 vy = Mathf.Max(vy - GameConfig.Gravity * Time.deltaTime, -GameConfig.MaxFall);
                 pos.y += vy * Time.deltaTime;
                 transform.position = pos;
-                if (_visual != null) _visual.localPosition = Vector3.zero;
+                if (_visual != null) _visual.localPosition = new Vector3(0f, -HalfH, 0f);
                 if (_sr != null) _sr.flipY = false;
                 yield return null;
             }
@@ -302,10 +304,16 @@ namespace Fishy
             if (hit.collider != null)
                 pos.y = hit.point.y + HalfH;
             transform.position = pos;
-            _visual.localScale = new Vector3(ArtBaseFacing, 1f, 1f);
+            _visual.localScale = new Vector3(
+                ArtBaseFacing * PlayerVisualScale,
+                PlayerVisualScale,
+                1f);
             _sr.flipX = false;
             _bob += dt * 8f;
-            _visual.localPosition = new Vector3(0, Mathf.Sin(_bob * 2f) * 0.075f, 0);
+            _visual.localPosition = new Vector3(
+                0f,
+                -HalfH + Mathf.Sin(_bob * 2f) * 0.075f,
+                0f);
         }
 
         public void HideVisual() { if (_visual != null) _visual.gameObject.SetActive(false); }

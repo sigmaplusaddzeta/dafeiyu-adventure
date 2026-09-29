@@ -9,6 +9,7 @@ namespace Fishy
     public static class GameAssets
     {
         public const float PPU = 16f; // 每单位 16 像素（1 图块 = 1 单位）
+        const float PlayerPPU = 384f; // 新主角立绘的世界尺寸约为 1 单位高
 
         // ================= 调色板 =================
         static readonly Color32 C_o = new Color32(22, 41, 79, 255);     // 深蓝轮廓
@@ -465,6 +466,36 @@ namespace Fishy
         static Sprite _fishOpen, _fishBlink, _bug, _bugSq, _rice, _cloud, _bush;
         static Sprite _ground, _net, _question, _used, _stone, _ptl, _ptr, _pbl, _pbr;
         static Sprite _castle, _pole, _ball, _flag, _castleFlag;
+        static Sprite _playerSprite;
+
+        public static Sprite PlayerSprite
+        {
+            get
+            {
+                if (_playerSprite != null) return _playerSprite;
+
+                var importedSprite = Resources.Load<Sprite>("Player/whale_maid");
+                var texture = importedSprite != null
+                    ? importedSprite.texture
+                    : Resources.Load<Texture2D>("Player/whale_maid");
+                if (texture != null)
+                {
+                    texture.filterMode = FilterMode.Bilinear;
+                    texture.wrapMode = TextureWrapMode.Clamp;
+                    _playerSprite = Sprite.Create(
+                        texture,
+                        new Rect(0f, 0f, texture.width, texture.height),
+                        new Vector2(0.5f, 0f),
+                        PlayerPPU);
+                }
+                else
+                {
+                    _playerSprite = Spr(FromArt(ArtFish, PalFish));
+                }
+
+                return _playerSprite;
+            }
+        }
 
         public static Sprite FishOpen { get { if (_fishOpen == null) _fishOpen = Spr(FromArt(ArtFish, PalFish)); return _fishOpen; } }
         public static Sprite FishBlink { get { if (_fishBlink == null) _fishBlink = Spr(FromArt(ArtFishBlink, PalFish)); return _fishBlink; } }

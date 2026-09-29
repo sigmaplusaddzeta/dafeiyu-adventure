@@ -56,8 +56,9 @@ namespace Fishy
             var fishGo = new GameObject("TitleFish");
             fishGo.transform.SetParent(_title.transform, false);
             _titleFish = fishGo.AddComponent<Image>();
-            _titleFish.sprite = GameAssets.FishOpen;
-            _titleFish.rectTransform.sizeDelta = new Vector2(48, 36);
+            _titleFish.sprite = GameAssets.PlayerSprite;
+            _titleFish.preserveAspect = true;
+            _titleFish.rectTransform.sizeDelta = new Vector2(36, 54);
             _titleFish.rectTransform.anchoredPosition = new Vector2(0, 12);
 
             // ---- 暂停 ----
