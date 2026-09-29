@@ -18,7 +18,9 @@ namespace Fishy
         public static FishController Player;
         public static Tilemap TileMap;
         public static readonly Dictionary<Vector3Int, char> Kinds = new Dictionary<Vector3Int, char>();
-        public static Vector2 SpawnPos = new Vector2(2.5f, 2.4f);
+        public static Vector2 SpawnPos = new Vector2(
+            2.5f,
+            2f + GameConfig.PlayerHalfH + 0.04f);
         public static Vector2 CheckpointPos;
         public static bool HasCheckpoint;
         public static string NoticeText;

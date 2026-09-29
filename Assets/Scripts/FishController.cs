@@ -25,8 +25,9 @@ namespace Fishy
         Sprite[] _idleFrames, _walkRightFrames, _walkLeftFrames;
         Sprite[] _runRightFrames, _runLeftFrames, _jumpFrames;
 
-        const float HalfW = 0.4f, HalfH = 0.34f; // 碰撞盒半尺寸 (0.8 x 0.68)
-        const float PlayerVisualScale = 0.82f * 2.5f;
+        const float HalfW = GameConfig.PlayerHalfW;
+        const float HalfH = GameConfig.PlayerHalfH;
+        const float PlayerVisualScale = 0.82f * 3f;
         const float IdleSpeedThreshold = 0.12f;
 
         public Rigidbody2D Body { get { return _rb; } }

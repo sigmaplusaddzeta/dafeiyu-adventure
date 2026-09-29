@@ -27,11 +27,15 @@ namespace Fishy
         public const float StompBounce = 18.75f;   // 5.0 px/f 踩敌反弹
         public const float StompBounceHeld = 28.125f; // 7.5 px/f 按住跳踩敌反弹
 
+        // ---- 玩家尺寸 ----
+        public const float PlayerHalfW = 0.45f;
+        public const float PlayerHalfH = 0.9f;
+
         // ---- 流程 ----
         public const float FlagSlide = 12f;        // 3.2 px/f 旗杆下滑
         public const float CastleWalk = 4.875f;    // 1.3 px/f 走向城堡
         public const float BugSpeed = 1.875f;      // 0.5 px/f 米虫速度
-        public const float BugActivateDist = 33f;  // 米虫激活距离（相对相机左缘）
+        public const float BugActivateDist = 28f;  // 米虫激活距离（相对相机左缘）
 
         // ---- 关卡结构 ----
         public const int Rows = 17;
@@ -41,8 +45,8 @@ namespace Fishy
         public const float PitY = -2.5f;           // 掉出此高度判死
 
         // ---- 相机 ----
-        public const float CamHalfW = 15f;         // 视野半宽 480px/2/16
-        public const float CamHalfH = 8.5f;        // 视野半高 272px/2/16
+        public const float CamHalfW = 13.5f;       // 更接近标准横版的近景比例
+        public const float CamHalfH = 7.5f;
         public const float CamLerp = 0.18f;        // 每帧跟随插值
 
         public static readonly Color32 Sky = new Color32(92, 148, 252, 255);

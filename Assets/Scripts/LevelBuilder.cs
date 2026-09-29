@@ -58,8 +58,17 @@ namespace Fishy
                         case 'y': tm.SetTile(cell, GameAssets.TPipeBR); GameManager.Kinds[cell] = 'y'; break;
                         case 'C': MakeCoin(world, c + 0.5f, 16.5f - r); break;
                         case 'E': MakeBug(world, c + 0.5f, 16f - r); break;
-                        case 'P': GameManager.SpawnPos = new Vector2(c + 0.5f, 16f - r + 0.34f); break;
-                        case 'K': MakeCheckpoint(world, c + 0.5f, 16f - r + 0.34f); break;
+                        case 'P':
+                            GameManager.SpawnPos = new Vector2(
+                                c + 0.5f,
+                                16f - r + GameConfig.PlayerHalfH + 0.04f);
+                            break;
+                        case 'K':
+                            MakeCheckpoint(
+                                world,
+                                c + 0.5f,
+                                16f - r + GameConfig.PlayerHalfH + 0.04f);
+                            break;
                         case '|':
                             FlagX = c + 0.5f;
                             FlagTopY = Mathf.Max(FlagTopY, y + 1f); // 杆顶（最高格上缘）
