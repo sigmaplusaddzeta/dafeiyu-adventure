@@ -32,7 +32,7 @@ namespace Fishy
 #endif
         }
 
-        public static bool RunHeld()
+        public static bool WalkModifierHeld()
         {
 #if ENABLE_INPUT_SYSTEM
             return Down(Key(UnityEngine.InputSystem.Key.LeftShift)) || Down(Key(UnityEngine.InputSystem.Key.RightShift)) || Down(Key(UnityEngine.InputSystem.Key.J));

@@ -9,8 +9,8 @@ namespace Fishy
     public static class GameConfig
     {
         // ---- 玩家移动手感 ----
-        public const float WalkSpeed = 9.75f;      // 2.6 px/f 走路
-        public const float RunSpeed = 15f;         // 4.0 px/f 加速跑
+        public const float WalkSpeed = 9.75f;      // 按住 Shift/J 时的行走速度
+        public const float RunSpeed = 15f;         // 默认奔跑速度
         public const float GroundAccel = 49.5f;    // 0.22 px/f² 地面加速
         public const float AirAccel = 33.75f;      // 0.15 px/f² 空中加速
         public const float GroundFriction = 0.8f;  // 地面摩擦（每帧乘算）

@@ -17,15 +17,17 @@ namespace Fishy
         Transform _visual;
         SpriteRenderer _sr;
 
-        float _coyote, _jumpBuf, _bob, _sprayT, _dustT, _turnT;
-        bool _jumpHeld, _dying;
-        float _hAxis; bool _runHeld; // Update 采样的输入缓存（FixedUpdate 使用，更跟手）
+        float _coyote, _jumpBuf, _bob, _sprayT, _dustT, _turnT, _animTime;
+        bool _jumpHeld, _dying, _walkMode;
+        float _hAxis; bool _walkHeld; // Update 采样的输入缓存（FixedUpdate 使用，更跟手）
         readonly List<Collider2D> _groundHits = new List<Collider2D>(8);
         ContactFilter2D _groundFilter;
+        Sprite[] _idleFrames, _walkRightFrames, _walkLeftFrames;
+        Sprite[] _runRightFrames, _runLeftFrames, _jumpFrames;
 
         const float HalfW = 0.4f, HalfH = 0.34f; // 碰撞盒半尺寸 (0.8 x 0.68)
-        const float ArtBaseFacing = -1f; // 原始鱼图朝向左侧，右移时使用负缩放翻转
         const float PlayerVisualScale = 0.82f;
+        const float IdleSpeedThreshold = 0.12f;
 
         public Rigidbody2D Body { get { return _rb; } }
 
@@ -48,15 +50,25 @@ namespace Fishy
             vgo.transform.SetParent(transform, false);
             _visual = vgo.transform;
             _sr = vgo.AddComponent<SpriteRenderer>();
-            _sr.sprite = GameAssets.PlayerSprite;
             _sr.sortingOrder = 3;
             _sr.flipX = false;
             _visual.localPosition = new Vector3(0f, -HalfH, 0f);
-            _visual.localScale = new Vector3(ArtBaseFacing * PlayerVisualScale, PlayerVisualScale, 1f);
+            _visual.localScale = new Vector3(PlayerVisualScale, PlayerVisualScale, 1f);
+
+            _idleFrames = GameAssets.LoadPlayerFrames("stand", 2);
+            _walkRightFrames = GameAssets.LoadPlayerFrames("walk_right", 4);
+            _walkLeftFrames = GameAssets.LoadPlayerFrames("walk_left", 4);
+            _runRightFrames = GameAssets.LoadPlayerFrames("run_right", 4);
+            _runLeftFrames = GameAssets.LoadPlayerFrames("run_left", 4);
+            _jumpFrames = GameAssets.LoadPlayerFrames("jump", 4);
+            _sr.sprite = _idleFrames.Length > 0 && _idleFrames[0] != null
+                ? _idleFrames[0]
+                : GameAssets.PlayerSprite;
 
             transform.position = pos;
             Velocity = Vector2.zero;
             Face = 1; Grounded = false; _dying = false;
+            _walkMode = false; _animTime = 0f;
             _sprayT = 1f; _dustT = 0f;
             _groundFilter = new ContactFilter2D
             {
@@ -72,7 +84,7 @@ namespace Fishy
             // 先采样输入：标题页面开始游戏的同一帧，后续 FixedUpdate 也能立即移动。
             _hAxis = InputProvider.Horizontal();
             _jumpHeld = InputProvider.JumpHeld();
-            _runHeld = InputProvider.RunHeld();
+            _walkHeld = InputProvider.WalkModifierHeld();
 
             if (GameManager.State != GameState.Play || _dying) return;
 
@@ -102,9 +114,10 @@ namespace Fishy
 
             float dt = Time.fixedDeltaTime;
             float h = _hAxis;
-            bool run = _runHeld;
+            bool walk = _walkHeld;
+            _walkMode = walk;
             if (_rb.IsSleeping()) _rb.WakeUp();
-            float max = run ? GameConfig.RunSpeed : GameConfig.WalkSpeed;
+            float max = walk ? GameConfig.WalkSpeed : GameConfig.RunSpeed;
             float acc = Grounded ? GameConfig.GroundAccel : GameConfig.AirAccel;
 
             if (h > 0f) Velocity.x += acc * dt;
@@ -224,7 +237,7 @@ namespace Fishy
                 scaleY = 1.16f - 0.16f * (1f - k);
             }
             _visual.localScale = new Vector3(
-                ArtBaseFacing * PlayerVisualScale * scaleX * Face,
+                PlayerVisualScale * scaleX,
                 PlayerVisualScale * scaleY,
                 1f);
 
@@ -234,6 +247,7 @@ namespace Fishy
                 : -0.0625f;
             _visual.localPosition = new Vector3(0, -HalfH + yOff, 0);
             _sr.flipX = false;
+            UpdateFrame(dt);
 
             _sprayT += dt;
             if (Grounded && _sprayT > 1.83f)
@@ -247,6 +261,50 @@ namespace Fishy
                         Random.Range(-1f, -3f),
                         new Color32(191, 228, 255, 255), 0.37f, -0.6f);
             }
+        }
+
+        void UpdateFrame(float dt)
+        {
+            Sprite[] frames;
+            int index;
+
+            if (!Grounded)
+            {
+                frames = _jumpFrames;
+                float vy = Velocity.y;
+                index = vy > 8f ? 1 : vy > 2f ? 0 : vy > -3f ? 2 : 3;
+            }
+            else if (Mathf.Abs(Velocity.x) < IdleSpeedThreshold)
+            {
+                frames = _idleFrames;
+                _animTime += dt * 2f;
+                index = (int)_animTime;
+            }
+            else if (_walkMode)
+            {
+                float speed = Mathf.Abs(Velocity.x);
+                float t = Mathf.InverseLerp(0f, GameConfig.WalkSpeed, speed);
+                _animTime += dt * Mathf.Lerp(3.5f, 6f, t);
+                frames = Face < 0 ? _walkLeftFrames : _walkRightFrames;
+                index = (int)_animTime;
+            }
+            else
+            {
+                float speed = Mathf.Abs(Velocity.x);
+                float t = Mathf.InverseLerp(0f, GameConfig.RunSpeed, speed);
+                _animTime += dt * Mathf.Lerp(7f, 12f, t);
+                frames = Face < 0 ? _runLeftFrames : _runRightFrames;
+                index = (int)_animTime;
+            }
+
+            if (frames == null || frames.Length == 0)
+            {
+                _sr.sprite = GameAssets.PlayerSprite;
+                return;
+            }
+
+            index %= frames.Length;
+            if (frames[index] != null) _sr.sprite = frames[index];
         }
 
         // ---- 死亡动画（悬停后坠落） ----
@@ -305,7 +363,7 @@ namespace Fishy
                 pos.y = hit.point.y + HalfH;
             transform.position = pos;
             _visual.localScale = new Vector3(
-                ArtBaseFacing * PlayerVisualScale,
+                PlayerVisualScale,
                 PlayerVisualScale,
                 1f);
             _sr.flipX = false;

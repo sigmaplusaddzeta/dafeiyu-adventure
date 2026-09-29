@@ -467,6 +467,8 @@ namespace Fishy
         static Sprite _ground, _net, _question, _used, _stone, _ptl, _ptr, _pbl, _pbr;
         static Sprite _castle, _pole, _ball, _flag, _castleFlag;
         static Sprite _playerSprite;
+        static readonly Dictionary<string, Sprite[]> PlayerFrameCache =
+            new Dictionary<string, Sprite[]>();
 
         public static Sprite PlayerSprite
         {
@@ -495,6 +497,33 @@ namespace Fishy
 
                 return _playerSprite;
             }
+        }
+
+        public static Sprite[] LoadPlayerFrames(string prefix, int count)
+        {
+            string cacheKey = prefix + "_" + count;
+            if (PlayerFrameCache.TryGetValue(cacheKey, out var cached)) return cached;
+
+            var frames = new Sprite[count];
+            for (int i = 0; i < count; i++)
+            {
+                string resourcePath = $"Player/Animation/{prefix}_{i:00}";
+                var importedSprite = Resources.Load<Sprite>(resourcePath);
+                var texture = importedSprite != null
+                    ? importedSprite.texture
+                    : Resources.Load<Texture2D>(resourcePath);
+                if (texture == null) continue;
+
+                texture.filterMode = FilterMode.Bilinear;
+                texture.wrapMode = TextureWrapMode.Clamp;
+                frames[i] = Sprite.Create(
+                    texture,
+                    new Rect(0f, 0f, texture.width, texture.height),
+                    new Vector2(0.5f, 0f),
+                    PlayerPPU);
+            }
+            PlayerFrameCache[cacheKey] = frames;
+            return frames;
         }
 
         public static Sprite FishOpen { get { if (_fishOpen == null) _fishOpen = Spr(FromArt(ArtFish, PalFish)); return _fishOpen; } }

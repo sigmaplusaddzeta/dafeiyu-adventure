@@ -50,7 +50,7 @@ namespace Fishy
             _titleBest = Text(_title.transform, "", 0, -94, 480, TextAnchor.MiddleCenter, 10);
             _titleBest.color = new Color32(255, 233, 168, 255);
             _blink = Text(_title.transform, "按任意键开始", 0, -130, 480, TextAnchor.MiddleCenter, 14);
-            var help = Text(_title.transform, "←→/AD 移动   空格/↑ 跳跃   Shift 加速跑   M 静音", 0, -176, 480, TextAnchor.MiddleCenter, 10);
+            var help = Text(_title.transform, "←→/AD 移动   空格/↑ 跳跃   Shift/J 行走   M 静音", 0, -176, 480, TextAnchor.MiddleCenter, 10);
             help.color = new Color32(232, 240, 255, 255);
 
             var fishGo = new GameObject("TitleFish");
